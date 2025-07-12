@@ -16,3 +16,8 @@
 /config.d/
 /venv/
 
+# POET
+/release/poet/*.gz
+/release/poet/*.db
+/release/poet/sing-poet
+
