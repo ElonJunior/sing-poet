@@ -11,6 +11,8 @@ import (
 	"github.com/sagernet/sing-box/log"
 	"github.com/sagernet/sing/common"
 	E "github.com/sagernet/sing/common/exceptions"
+
+	POET "github.com/sagernet/sing-box/poet"
 )
 
 var _ adapter.InboundManager = (*Manager)(nil)
@@ -145,5 +147,9 @@ func (m *Manager) Create(ctx context.Context, router adapter.Router, logger log.
 	}
 	m.inbounds = append(m.inbounds, inbound)
 	m.inboundByTag[tag] = inbound
+
+	POET.SetInboud(&inbound, tag)
+	//END poet
+
 	return nil
 }

@@ -33,6 +33,8 @@ import (
 	"github.com/sagernet/sing/common/ntp"
 	"github.com/sagernet/sing/service"
 	"github.com/sagernet/sing/service/pause"
+
+	POET "github.com/sagernet/sing-box/poet"
 )
 
 var _ adapter.SimpleLifecycle = (*Box)(nil)
@@ -155,6 +157,9 @@ func New(options Options) (*Box, error) {
 	if err != nil {
 		return nil, E.Cause(err, "create log factory")
 	}
+
+	POET.SetLogger(logFactory)
+	//END poet
 
 	var internalServices []adapter.LifecycleService
 	certificateOptions := common.PtrValueOrDefault(options.Certificate)
@@ -417,6 +422,9 @@ func (s *Box) PreStart() error {
 }
 
 func (s *Box) Start() error {
+	//panel service
+	POET.Start()
+
 	err := s.start()
 	if err != nil {
 		// TODO: remove catch error

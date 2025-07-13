@@ -2,8 +2,8 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"sync/atomic"
 
 	"github.com/sagernet/sing-box/adapter"
@@ -61,22 +61,25 @@ func (c *Controller) syncUserList() error {
 	}
 
 	// update inbound server userList
-	switch strings.ToLower(c.nodeInfo.NodeType) {
+	// 1. 检查是否实现 UserRefresher 接口
+	in := *c.inbound
+	refresher, ok := in.(adapter.PInbound)
+	if !ok {
+		c.log(fmt.Sprintf("unsupported node type: %s", c.nodeInfo.NodeType), "error")
+		return errors.New("inbound type does not support user refresh")
+	}
 
-	case "tuic":
-		users := c.buildTUICUser(userInfo)
-		in := *c.inbound
-		in.UpdateUsers(users)
-	case "hysteria2":
-		users := c.buildHysteria2User(userInfo)
-		in := *c.inbound
-		in.UpdateUsers(users)
-	case "vmess", "v2ray", "v2fly":
-		users := c.buildVMessUser(userInfo)
-		in := *c.inbound
-		in.UpdateUsers(users)
-	default:
-		return fmt.Errorf("unsupported node type: %s", c.nodeInfo.NodeType)
+	// 2. 构建适合该类型的用户数据
+	users, err := c.BuildUsers(c.nodeInfo.NodeType, userInfo)
+	if err != nil {
+		c.log(fmt.Sprintf("Failed to build users for node type %s, error: %v", c.nodeInfo.NodeType, err), "error")
+		return err
+	}
+
+	// 3. 刷新用户
+	if err := refresher.RefreshUsers(users); err != nil {
+		c.log(fmt.Sprintf("Failed to refresh users for node type %s, error: %v", c.nodeInfo.NodeType, err), "error")
+		return err
 	}
 
 	c.log(fmt.Sprintf("final UsersMap: %d \tuserInfo: %d ", len(c.usersMap), len(*userInfo)), "info")
