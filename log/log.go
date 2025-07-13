@@ -49,6 +49,11 @@ func New(options Options) (Factory, error) {
 			MaxBackups: logOptions.MaxBackups,
 			MaxAge:     logOptions.MaxAge, //days
 		}
+		if logOptions.Level == "debug" || logOptions.Level == "trace" {
+			//建多目标写入器：同时输出到文件和控制台
+			logWriter = io.MultiWriter(os.Stdout, logWriter)
+		}
+
 	//END poet
 
 	default:
