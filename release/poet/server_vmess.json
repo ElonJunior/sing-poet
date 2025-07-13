@@ -1,0 +1,98 @@
+{
+    "log": {
+        "disabled": false,
+        "level": "debug",
+        "timestamp": true,
+        "output": "lumberjack",
+        "filename": "/var/log/sing-poet.log",
+        "maxsize": 20,
+        "maxbackups": 5,
+        "maxage": 14
+    },
+    "dns": {
+        "servers": [
+            {
+                "tag": "google-tls",
+                "type": "tls",
+                "server": "dns.google",
+                "domain_resolver": "dns-local"
+            },
+            {
+                "tag": "google-udp",
+                "type": "udp",
+                "server": "8.8.8.8",
+                "domain_resolver": "dns-local"
+            },
+            {
+                "tag": "dns-local",
+                "type": "local"
+            }
+        ],
+        "strategy": "prefer_ipv4",
+        "disable_cache": false,
+        "disable_expire": false
+    },
+    "inbounds": [
+        {
+            "type": "vmess",
+            "tag": "vmess-in",
+            "listen": "0.0.0.0",
+            "listen_port": 54111,
+            "domain_strategy": "prefer_ipv4",
+            "tcp_fast_open": false,
+            "sniff": false,
+            "sniff_override_destination": false,
+            "proxy_protocol": false,
+            "users": [
+                {
+                    "name": "sekai",
+                    "uuid": "059032A9-7D40-4A96-9BB1-36823D848068",
+                    "alterId": 0
+                },
+                {
+                    "name": "beaver",
+                    "uuid": "237032A9-7D40-4A96-9BB1-A4923D848024",
+                    "alterId": 0
+                }
+            ],
+            "transport": {
+                "type": "ws",
+                "path": "/vmess"
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "type": "direct",
+            "tag": "vmess-out"
+        },
+        {
+            "type": "direct",
+            "tag": "direct"
+        }
+    ],
+    "route": {
+        "rules": [
+            {
+                "protocol": "dns",
+                "action": "hijack-dns"
+            },
+            {
+                "inbound": "vmess-in",
+                "outbound": "vmess-out"
+            }
+        ],
+        "geoip": {
+            "path": "/etc/sing-poet/geoip.db",
+            "download_url": "https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db",
+            "download_detour": "direct"
+        },
+        "geosite": {
+            "path": "/etc/sing-poet/geosite.db",
+            "download_url": "https://github.com/SagerNet/sing-geosite/releases/latest/download/geosite.db",
+            "download_detour": "direct"
+        },
+        "final": "direct",
+        "auto_detect_interface": true
+    }
+}

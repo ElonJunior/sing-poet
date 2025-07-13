@@ -10,6 +10,7 @@ import (
 	"github.com/sagernet/sing-box/experimental/deprecated"
 	"github.com/sagernet/sing-box/include"
 	"github.com/sagernet/sing-box/log"
+	"github.com/sagernet/sing-box/poet/shortcuts"
 	"github.com/sagernet/sing/service"
 	"github.com/sagernet/sing/service/filemanager"
 
@@ -22,6 +23,7 @@ var (
 	configDirectories []string
 	workingDir        string
 	disableColor      bool
+	poetConfigPath    string
 )
 
 var mainCommand = &cobra.Command{
@@ -34,6 +36,7 @@ func init() {
 	mainCommand.PersistentFlags().StringArrayVarP(&configDirectories, "config-directory", "C", nil, "set configuration directory path")
 	mainCommand.PersistentFlags().StringVarP(&workingDir, "directory", "D", "", "set working directory")
 	mainCommand.PersistentFlags().BoolVarP(&disableColor, "disable-color", "", false, "disable color output")
+	mainCommand.PersistentFlags().StringVarP(&poetConfigPath, "pconfig", "p", "", "set poet panel config file path")
 }
 
 func preRun(cmd *cobra.Command, args []string) {
@@ -64,6 +67,13 @@ func preRun(cmd *cobra.Command, args []string) {
 			log.Fatal(err)
 		}
 	}
+
+	//set poet panel config
+	if poetConfigPath != "" {
+		shortcuts.SetObject("poetConfigPath", poetConfigPath)
+	}
+	//END poet
+
 	if len(configPaths) == 0 && len(configDirectories) == 0 {
 		configPaths = append(configPaths, "config.json")
 	}

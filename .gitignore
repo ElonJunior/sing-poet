@@ -19,5 +19,5 @@
 # POET
 /release/poet/*.gz
 /release/poet/*.db
-/release/poet/sing-poet
+/release/poet/test/
 

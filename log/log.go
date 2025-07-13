@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/natefinch/lumberjack"
 	"github.com/sagernet/sing-box/option"
 	E "github.com/sagernet/sing/common/exceptions"
 )
@@ -39,6 +40,17 @@ func New(options Options) (Factory, error) {
 		logWriter = os.Stderr
 	case "stdout":
 		logWriter = os.Stdout
+
+	//poet log with file
+	case "lumberjack":
+		logWriter = &lumberjack.Logger{
+			Filename:   logOptions.Filename,
+			MaxSize:    logOptions.MaxSize, // megabytes
+			MaxBackups: logOptions.MaxBackups,
+			MaxAge:     logOptions.MaxAge, //days
+		}
+	//END poet
+
 	default:
 		logFilePath = logOptions.Output
 	}

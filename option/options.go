@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 
+	"github.com/natefinch/lumberjack"
 	E "github.com/sagernet/sing/common/exceptions"
 	"github.com/sagernet/sing/common/json"
 )
@@ -42,6 +43,9 @@ type LogOptions struct {
 	Output       string `json:"output,omitempty"`
 	Timestamp    bool   `json:"timestamp,omitempty"`
 	DisableColor bool   `json:"-"`
+
+	// natefinch/lumberjack
+	lumberjack.Logger
 }
 
 type StubOptions struct{}
