@@ -170,31 +170,3 @@ func (h *Inbound) Close() error {
 		common.PtrOrNil(h.server),
 	)
 }
-
-// 确保实现 UserRefresher 接口
-var _ adapter.PInbound = (*Inbound)(nil)
-
-// UpdateUsers 更新用户列表
-func (h *Inbound) RefreshUsers(users any) error {
-
-	var userList []int
-	var userNameList []string
-	var userUUIDList [][16]byte
-	var userPasswordList []string
-	for index, user := range users.([]*option.TUICUser) {
-		if user.UUID == "" {
-			return E.New("missing uuid for user ", index)
-		}
-		userUUID, err := uuid.FromString(user.UUID)
-		if err != nil {
-			return E.Cause(err, "invalid uuid for user ", index)
-		}
-		userList = append(userList, index)
-		userNameList = append(userNameList, user.Name)
-		userUUIDList = append(userUUIDList, userUUID)
-		userPasswordList = append(userPasswordList, user.Password)
-	}
-	h.server.UpdateUsers(userList, userUUIDList, userPasswordList)
-	h.userNameList = userNameList
-	return nil
-}

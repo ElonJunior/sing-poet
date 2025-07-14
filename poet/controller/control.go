@@ -69,15 +69,15 @@ func (c *Controller) syncUserList() error {
 		return errors.New("inbound type does not support user refresh")
 	}
 
-	// 2. 构建适合该类型的用户数据
-	users, err := c.BuildUsers(c.nodeInfo, userInfo)
-	if err != nil {
-		c.log(fmt.Sprintf("Failed to build users for node type %s, error: %v", c.nodeInfo.NodeType, err), "error")
-		return err
-	}
+	// // 2. 构建适合该类型的用户数据
+	// users, err := c.BuildUsers(c.nodeInfo, userInfo)
+	// if err != nil {
+	// 	c.log(fmt.Sprintf("Failed to build users for node type %s, error: %v", c.nodeInfo.NodeType, err), "error")
+	// 	return err
+	// }
 
 	// 3. 刷新用户
-	if err := refresher.RefreshUsers(users); err != nil {
+	if err := refresher.RefreshUsers(userInfo, c.nodeInfo); err != nil {
 		c.log(fmt.Sprintf("Failed to refresh users for node type %s, error: %v", c.nodeInfo.NodeType, err), "error")
 		return err
 	}

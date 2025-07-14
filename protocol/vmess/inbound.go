@@ -226,24 +226,3 @@ func (h *inboundTransportHandler) NewConnectionEx(ctx context.Context, conn net.
 	h.logger.InfoContext(ctx, "inbound connection from ", metadata.Source)
 	(*Inbound)(h).NewConnectionEx(ctx, conn, metadata, onClose)
 }
-
-// 确保实现 UserRefresher 接口
-var _ adapter.PInbound = (*Inbound)(nil)
-
-// UpdateUsers 更新VMess用户
-func (h *Inbound) RefreshUsers(users any) error {
-	opUsers := users.([]option.VMessUser)
-
-	err := h.service.UpdateUsers(common.MapIndexed(opUsers, func(index int, it option.VMessUser) int {
-		return index
-	}), common.Map(opUsers, func(it option.VMessUser) string {
-		return it.UUID
-	}), common.Map(opUsers, func(it option.VMessUser) int {
-		return it.AlterId
-	}))
-	h.users = opUsers
-
-	return err
-}
-
-//END poet

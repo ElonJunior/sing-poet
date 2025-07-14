@@ -36,7 +36,7 @@
         {
             "type": "vmess",
             "tag": "vmess-in",
-            "listen": "0.0.0.0",
+            "listen": "::",
             "listen_port": 54111,
             "domain_strategy": "prefer_ipv4",
             "tcp_fast_open": false,

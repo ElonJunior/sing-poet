@@ -213,24 +213,3 @@ func (h *Inbound) Close() error {
 		common.PtrOrNil(h.service),
 	)
 }
-
-// 确保实现 UserRefresher 接口
-var _ adapter.PInbound = (*Inbound)(nil)
-
-// UpdateUsers 更新用户列表
-func (h *Inbound) RefreshUsers(users any) error {
-	opUsers := users.([]*option.Hysteria2User)
-
-	userList := make([]int, 0, len(opUsers))
-	userNameList := make([]string, 0, len(opUsers))
-	userPasswordList := make([]string, 0, len(opUsers))
-	for index, user := range opUsers {
-		userList = append(userList, index)
-		userNameList = append(userNameList, user.Name)
-		userPasswordList = append(userPasswordList, user.Password)
-	}
-	h.service.UpdateUsers(userList, userPasswordList)
-	h.userNameList = userNameList
-
-	return nil
-}
