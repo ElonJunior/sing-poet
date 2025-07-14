@@ -15,7 +15,7 @@ import (
 	"github.com/sagernet/sing-box/log"
 	"github.com/sagernet/sing-box/option"
 	"github.com/sagernet/sing-box/transport/v2ray"
-	"github.com/sagernet/sing-vmess"
+	vmess "github.com/sagernet/sing-vmess"
 	"github.com/sagernet/sing-vmess/packetaddr"
 	"github.com/sagernet/sing-vmess/vless"
 	"github.com/sagernet/sing/common"
@@ -211,4 +211,41 @@ func (h *inboundTransportHandler) NewConnectionEx(ctx context.Context, conn net.
 	metadata.InboundOptions = h.listener.ListenOptions().InboundOptions
 	h.logger.InfoContext(ctx, "inbound connection from ", metadata.Source)
 	(*Inbound)(h).NewConnectionEx(ctx, conn, metadata, onClose)
+}
+
+// 确保实现 UserRefresher 接口
+var _ adapter.PInbound = (*Inbound)(nil)
+
+// RefreshUsers 更新用户列表
+func (h *Inbound) RefreshUsers(users any) error {
+	// 1. 类型断言和验证
+	opUsers, ok := users.([]option.VLESSUser)
+	if !ok {
+		return E.New("invalid users type for VLESS")
+	}
+
+	// 2. 准备更新参数
+	indices := make([]int, len(opUsers))
+	uuids := make([]string, len(opUsers))
+	flows := make([]string, len(opUsers))
+
+	for i, user := range opUsers {
+		indices[i] = i
+		uuids[i] = user.UUID
+		flows[i] = user.Flow
+	}
+
+	// 3. 更新服务
+	h.service.UpdateUsers(indices, uuids, flows)
+
+	// 4. 更新本地用户列表
+	h.users = opUsers
+
+	// 转换回值切片（如果必要）
+	// h.users = make([]option.VLESSUser, len(opUsers))
+	// for i, user := range opUsers {
+	// 	h.users[i] = *user
+	// }
+
+	return nil
 }

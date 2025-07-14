@@ -133,3 +133,26 @@ func (h *inboundHandler) NewConnectionEx(ctx context.Context, conn net.Conn, sou
 	}
 	h.router.RouteConnectionEx(ctx, conn, metadata, onClose)
 }
+
+// 确保实现 UserRefresher 接口
+var _ adapter.PInbound = (*Inbound)(nil)
+
+// RefreshUsers 更新用户列表
+func (h *Inbound) RefreshUsers(users any) error {
+	// 1. 类型安全校验
+	opUsers, ok := users.([]option.AnyTLSUser)
+	if !ok {
+		return E.New("invalid users type for AnyTLS")
+	}
+
+	// 2. 转换为 anytls.User 类型
+	anyTLSUsers := make([]anytls.User, len(opUsers))
+	for i, user := range opUsers {
+		anyTLSUsers[i] = anytls.User(user)
+	}
+
+	// 3. 更新服务用户
+	h.service.UpdateUsers(anyTLSUsers)
+
+	return nil
+}

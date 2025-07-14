@@ -70,7 +70,7 @@ func (c *Controller) syncUserList() error {
 	}
 
 	// 2. 构建适合该类型的用户数据
-	users, err := c.BuildUsers(c.nodeInfo.NodeType, userInfo)
+	users, err := c.BuildUsers(c.nodeInfo, userInfo)
 	if err != nil {
 		c.log(fmt.Sprintf("Failed to build users for node type %s, error: %v", c.nodeInfo.NodeType, err), "error")
 		return err

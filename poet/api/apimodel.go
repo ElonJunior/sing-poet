@@ -71,6 +71,7 @@ type UserInfo struct {
 	Passwd      string
 	Port        uint32
 	AlterID     uint16
+	Flow        string
 	Method      string
 	SpeedLimit  uint64 // Bps
 	DeviceLimit int

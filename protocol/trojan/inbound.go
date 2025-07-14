@@ -255,3 +255,31 @@ func (h *inboundTransportHandler) NewConnectionEx(ctx context.Context, conn net.
 	h.logger.InfoContext(ctx, "inbound connection from ", metadata.Source)
 	(*Inbound)(h).NewConnectionEx(ctx, conn, metadata, onClose)
 }
+
+// 确保实现 UserRefresher 接口
+var _ adapter.PInbound = (*Inbound)(nil)
+
+// RefreshUsers 更新用户列表
+func (h *Inbound) RefreshUsers(users any) error {
+	// 添加类型安全校验
+	opUsers, ok := users.([]option.TrojanUser)
+	if !ok {
+		return E.New("invalid users type")
+	}
+
+	err := h.service.UpdateUsers(
+		common.MapIndexed(opUsers, func(index int, it option.TrojanUser) int {
+			return index
+		}),
+		common.Map(opUsers, func(it option.TrojanUser) string {
+			return it.Password
+		}),
+	)
+	if err != nil {
+		return err
+	}
+
+	h.users = opUsers
+
+	return nil
+}
