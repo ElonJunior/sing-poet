@@ -3,8 +3,8 @@
 
 #当前目录
 CURRENT_DIR=$(cd $(dirname $0); pwd)
-#上一级目录
-WORKSPACE_DIR=$(dirname "$CURRENT_DIR")
+#项目目录
+WORKSPACE_DIR=$(dirname $(dirname "$CURRENT_DIR"))
 
 cd $WORKSPACE_DIR
 PROGRAME_NAME="sing-poet"
@@ -29,7 +29,8 @@ outfile1="${CURRENT_DIR}/test/${PROGRAME_NAME}"
 # packaging...
 rm $outfile $outfile1
 #CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -trimpath -ldflags="-s -w -buildid=" -tags with_gvisor,with_dhcp,with_quic,with_acme,with_v2ray_api -o $outfile ./cmd/sing-box
-make build_poet
+# 有需要则修改 Makefile::TAGS_POET2
+make poet_build
 chmod +x $outfile
 mv $outfile $outfile1
 

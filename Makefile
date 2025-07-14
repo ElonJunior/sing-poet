@@ -1,6 +1,7 @@
 NAME = sing-box
 COMMIT = $(shell git rev-parse --short HEAD)
 TAGS ?= with_gvisor,with_quic,with_dhcp,with_wireguard,with_utls,with_acme,with_clash_api,with_tailscale
+TAGS_POET2 = with_gvisor,with_quic
 
 GOHOSTOS = $(shell go env GOHOSTOS)
 GOHOSTARCH = $(shell go env GOHOSTARCH)
@@ -16,6 +17,10 @@ PREFIX ?= $(shell go env GOPATH)
 build:
 	export GOTOOLCHAIN=local && \
 	go build $(MAIN_PARAMS) $(MAIN)
+
+poet_build:
+	export GOTOOLCHAIN=local && \
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build $(PARAMS) -tags $(TAGS_POET2) $(MAIN)
 
 ci_build:
 	export GOTOOLCHAIN=local && \
