@@ -1,0 +1,16 @@
+{
+    "name": "connect the panel and synchronize the user list",
+    "nodes": [
+        {
+            "paneltype": "SSpanel",
+            "intag": "vmess-in",
+            "outtag": "vmess-out",
+            "apiconfig": {
+                "apihost": "http://localhost:8384",
+                "apikey": "your-apikey",
+                "nodeid": 16,
+                "nodetype": "vmess"
+            }
+        }
+    ]
+}
