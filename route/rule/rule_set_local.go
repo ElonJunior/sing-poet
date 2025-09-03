@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/sagernet/fswatch"
 	"github.com/sagernet/sing-box/adapter"
@@ -13,7 +14,6 @@ import (
 	C "github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/option"
 	"github.com/sagernet/sing/common"
-	"github.com/sagernet/sing/common/atomic"
 	E "github.com/sagernet/sing/common/exceptions"
 	F "github.com/sagernet/sing/common/format"
 	"github.com/sagernet/sing/common/json"
@@ -138,9 +138,9 @@ func (s *LocalRuleSet) reloadRules(headlessRules []option.HeadlessRule) error {
 		}
 	}
 	var metadata adapter.RuleSetMetadata
-	metadata.ContainsProcessRule = hasHeadlessRule(headlessRules, isProcessHeadlessRule)
-	metadata.ContainsWIFIRule = hasHeadlessRule(headlessRules, isWIFIHeadlessRule)
-	metadata.ContainsIPCIDRRule = hasHeadlessRule(headlessRules, isIPCIDRHeadlessRule)
+	metadata.ContainsProcessRule = HasHeadlessRule(headlessRules, isProcessHeadlessRule)
+	metadata.ContainsWIFIRule = HasHeadlessRule(headlessRules, isWIFIHeadlessRule)
+	metadata.ContainsIPCIDRRule = HasHeadlessRule(headlessRules, isIPCIDRHeadlessRule)
 	s.rules = rules
 	s.metadata = metadata
 	s.callbackAccess.Lock()
