@@ -100,7 +100,6 @@ func rewriteRcodeAction(rcodeMap map[string]int, ruleAction *DNSRuleAction) {
 	}
 	ruleAction.Action = C.RuleActionTypePredefined
 	ruleAction.PredefinedOptions.Rcode = common.Ptr(DNSRCode(rcode))
-	return
 }
 
 type DNSClientOptions struct {
@@ -180,7 +179,7 @@ func (o *DNSServerOptions) Upgrade(ctx context.Context) error {
 	options := o.Options.(*LegacyDNSServerOptions)
 	serverURL, _ := url.Parse(options.Address)
 	var serverType string
-	if serverURL.Scheme != "" {
+	if serverURL != nil && serverURL.Scheme != "" {
 		serverType = serverURL.Scheme
 	} else {
 		switch options.Address {
@@ -191,7 +190,7 @@ func (o *DNSServerOptions) Upgrade(ctx context.Context) error {
 		}
 	}
 	remoteOptions := RemoteDNSServerOptions{
-		LocalDNSServerOptions: LocalDNSServerOptions{
+		RawLocalDNSServerOptions: RawLocalDNSServerOptions{
 			DialerOptions: DialerOptions{
 				Detour: options.Detour,
 				DomainResolver: &DomainResolveOptions{
@@ -212,12 +211,14 @@ func (o *DNSServerOptions) Upgrade(ctx context.Context) error {
 	switch serverType {
 	case C.DNSTypeLocal:
 		o.Type = C.DNSTypeLocal
-		o.Options = &remoteOptions.LocalDNSServerOptions
+		o.Options = &LocalDNSServerOptions{
+			RawLocalDNSServerOptions: remoteOptions.RawLocalDNSServerOptions,
+		}
 	case C.DNSTypeUDP:
 		o.Type = C.DNSTypeUDP
 		o.Options = &remoteOptions
 		var serverAddr M.Socksaddr
-		if serverURL.Scheme == "" {
+		if serverURL == nil || serverURL.Scheme == "" {
 			serverAddr = M.ParseSocksaddr(options.Address)
 		} else {
 			serverAddr = M.ParseSocksaddr(serverURL.Host)
@@ -232,6 +233,9 @@ func (o *DNSServerOptions) Upgrade(ctx context.Context) error {
 	case C.DNSTypeTCP:
 		o.Type = C.DNSTypeTCP
 		o.Options = &remoteOptions
+		if serverURL == nil {
+			return E.New("invalid server address")
+		}
 		serverAddr := M.ParseSocksaddr(serverURL.Host)
 		if !serverAddr.IsValid() {
 			return E.New("invalid server address")
@@ -242,6 +246,9 @@ func (o *DNSServerOptions) Upgrade(ctx context.Context) error {
 		}
 	case C.DNSTypeTLS, C.DNSTypeQUIC:
 		o.Type = serverType
+		if serverURL == nil {
+			return E.New("invalid server address")
+		}
 		serverAddr := M.ParseSocksaddr(serverURL.Host)
 		if !serverAddr.IsValid() {
 			return E.New("invalid server address")
@@ -261,6 +268,9 @@ func (o *DNSServerOptions) Upgrade(ctx context.Context) error {
 			},
 		}
 		o.Options = &httpsOptions
+		if serverURL == nil {
+			return E.New("invalid server address")
+		}
 		serverAddr := M.ParseSocksaddr(serverURL.Host)
 		if !serverAddr.IsValid() {
 			return E.New("invalid server address")
@@ -274,6 +284,9 @@ func (o *DNSServerOptions) Upgrade(ctx context.Context) error {
 		}
 	case "rcode":
 		var rcode int
+		if serverURL == nil {
+			return E.New("invalid server address")
+		}
 		switch serverURL.Host {
 		case "success":
 			rcode = dns.RcodeSuccess
@@ -295,6 +308,9 @@ func (o *DNSServerOptions) Upgrade(ctx context.Context) error {
 	case C.DNSTypeDHCP:
 		o.Type = C.DNSTypeDHCP
 		dhcpOptions := DHCPDNSServerOptions{}
+		if serverURL == nil {
+			return E.New("invalid server address")
+		}
 		if serverURL.Host != "" && serverURL.Host != "auto" {
 			dhcpOptions.Interface = serverURL.Host
 		}
@@ -349,7 +365,7 @@ type HostsDNSServerOptions struct {
 	Predefined *badjson.TypedMap[string, badoption.Listable[netip.Addr]] `json:"predefined,omitempty"`
 }
 
-type LocalDNSServerOptions struct {
+type RawLocalDNSServerOptions struct {
 	DialerOptions
 	Legacy              bool           `json:"-"`
 	LegacyStrategy      DomainStrategy `json:"-"`
@@ -357,8 +373,13 @@ type LocalDNSServerOptions struct {
 	LegacyClientSubnet  netip.Prefix   `json:"-"`
 }
 
+type LocalDNSServerOptions struct {
+	RawLocalDNSServerOptions
+	PreferGo bool `json:"prefer_go,omitempty"`
+}
+
 type RemoteDNSServerOptions struct {
-	LocalDNSServerOptions
+	RawLocalDNSServerOptions
 	DNSServerAddressOptions
 	LegacyAddressResolver      string             `json:"-"`
 	LegacyAddressStrategy      DomainStrategy     `json:"-"`

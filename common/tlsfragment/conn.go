@@ -45,7 +45,7 @@ func (c *Conn) Write(b []byte) (n int, err error) {
 		defer func() {
 			c.firstPacketWritten = true
 		}()
-		serverName := indexTLSServerName(b)
+		serverName := IndexTLSServerName(b)
 		if serverName != nil {
 			if c.splitPacket {
 				if c.tcpConn != nil {
@@ -108,6 +108,9 @@ func (c *Conn) Write(b []byte) (n int, err error) {
 						_, err = c.Conn.Write(payload)
 						if err != nil {
 							return
+						}
+						if i != len(splitIndexes) {
+							time.Sleep(c.fallbackDelay)
 						}
 					}
 				}
