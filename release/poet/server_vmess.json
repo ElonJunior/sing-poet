@@ -28,7 +28,6 @@
                 "type": "local"
             }
         ],
-        "strategy": "prefer_ipv4",
         "disable_cache": false,
         "disable_expire": false
     },
@@ -38,7 +37,6 @@
             "tag": "vmess-in",
             "listen": "::",
             "listen_port": 54111,
-            "domain_strategy": "prefer_ipv4",
             "tcp_fast_open": false,
             "sniff": false,
             "sniff_override_destination": false,
@@ -82,6 +80,10 @@
                 "outbound": "vmess-out"
             }
         ],
+        "default_domain_resolver": {
+            "server": "google-tls",
+            "strategy": "prefer_ipv4"
+        },
         "geoip": {
             "path": "/etc/sing-poet/geoip.db",
             "download_url": "https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db",

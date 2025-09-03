@@ -21,7 +21,7 @@ mv $outfile $outfile1
 cd $CURRENT_DIR/test/
 tar zcvf $PROGRAME_NAME-lasted.tar.gz $PROGRAME_NAME
 echo -e "\n\t${PROGRAME_NAME} is ready to go!!!"
-ls -lha $outfile1 $PROGRAME_NAME-lasted.tar.gz
+ls -lha $outfile1 $CURRENT_DIR/test/$PROGRAME_NAME-lasted.tar.gz
 
 
 
